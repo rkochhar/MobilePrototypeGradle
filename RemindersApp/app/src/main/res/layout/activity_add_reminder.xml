@@ -6,43 +6,60 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".AddReminderActivity" >
-    
-	<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textStyle="bold"
-    android:text="@string/title_activity_add_reminder"
-    android:layout_gravity="center" 
-    android:layout_above="@+id/desc"
-	/>
-    
-   <EditText
+    tools:context=".AddReminderActivity"
+    android:background="#fff5ee">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/title_activity_add_reminder"
+        android:layout_gravity="center"
+        android:layout_above="@+id/desc"
+        />
+
+    <EditText
         android:id="@id/desc"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint="@string/reminder_desc" />
-    <EditText
-        android:id="@+id/type"
-        android:layout_width="fill_parent"
+
+
+    <Spinner android:id="@+id/typeSpinner"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:entries="@array/type_arrays"
+        android:prompt="@string/reminder_prompt"
         android:layout_below="@id/desc"
-        android:hint="@string/reminder_type"/>
+        android:hint="@string/reminder_prompt"/>
+
     <EditText
         android:id="@+id/date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/type"
+        android:layout_below="@id/typeSpinner"
         android:hint="@string/reminder_date"
-         />
-    
-    <Button
+        android:onClick="selectNewDate"
+        />
+
+    <DatePicker
+        android:id="@+id/dpResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/date"
+        android:background="#f0f0f0"
+        android:onClick="selectNewDate"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dpResult"
         android:layout_alignParentRight="true"
         android:text="@string/reminder_add_button"
-        android:onClick="addNewReminder" />
-    
+        android:onClick="addNewReminder"
+        android:id="@+id/add_button"
+        />
+
 
 </RelativeLayout>
