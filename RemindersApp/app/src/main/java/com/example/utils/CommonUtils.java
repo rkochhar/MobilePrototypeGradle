@@ -33,17 +33,12 @@ public class CommonUtils {
         return DATEFORMAT_LONG.format(date);
     }
 
-    public static List<Record> getReminders(InputStream inputStream,Context con) throws ParseException
+    public static List<Record> getReminders(InputStream inputStream,Context appContext) throws ParseException
     {
-
-        Log.v("", "Reached the point after which we read from the file..");
-
         String remindersString="[]";
         FileInputStream fis;
         try {
-            Log.v("info", "will call openFileInput after this");
-            fis = con.openFileInput("reminders.json");
-            Log.v("info", "did not fail at openFileInput after this");
+            fis = appContext.openFileInput("reminders.json");
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader bufferedReader = new BufferedReader(isr);
             StringBuilder sb = new StringBuilder();
@@ -53,11 +48,8 @@ public class CommonUtils {
             }
 
             remindersString=sb.toString();
-            Log.v("info", "Got the string from file-"+remindersString);
-            //remindersString="[]";
         }
         catch (Exception e) {
-            Log.v("error", "exception caught");
             e.printStackTrace();
         }
 
@@ -66,14 +58,6 @@ public class CommonUtils {
         try
         {
             JSONArray reminders = new JSONArray(remindersString);
-            if(reminders.length()==0){
-                Log.v("info","Lenght is zero here.");
-                JSONObject tmp = new JSONObject();
-                tmp.put("date", "1989-20-10");
-                tmp.put("name", "ABC");
-                tmp.put("type", 1);
-                reminders.put(tmp);
-            }
 
             for(int i=0; i < reminders.length(); i++)
             {

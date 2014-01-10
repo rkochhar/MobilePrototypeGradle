@@ -17,7 +17,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
@@ -29,6 +28,7 @@ import android.widget.Toast;
 public class AddReminderActivity extends Activity {
 
     int year,day,month;
+    final static int DATE_PICKER_DIALOG=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,6 @@ public class AddReminderActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.add_reminder, menu);
         return true;
     }
@@ -49,22 +48,21 @@ public class AddReminderActivity extends Activity {
 
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
 
-        EditText desc= (EditText) findViewById(R.id.desc);
-        EditText date= (EditText) findViewById(R.id.date);
-        Spinner remindertype= (Spinner) findViewById(R.id.typeSpinner);
+        EditText reminderDescription= (EditText) findViewById(R.id.desc);
+        EditText eventDate= (EditText) findViewById(R.id.date);
+        Spinner reminderType= (Spinner) findViewById(R.id.typeSpinner);
 
 
-        if( date.getText().toString().isEmpty()){
+        if( eventDate.getText().toString().isEmpty()){
             Toast errMsg=Toast.makeText(this, "Please fill in the date.", Toast.LENGTH_LONG);
             errMsg.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
             errMsg.show();
             return;
         }
-        if(desc.getText().toString().isEmpty()){
+        if(reminderDescription.getText().toString().isEmpty()){
             Toast errMsg=Toast.makeText(this, "Please add reminder description.", Toast.LENGTH_LONG);
             errMsg.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
             errMsg.show();
-
             return;
         }
 
@@ -72,18 +70,16 @@ public class AddReminderActivity extends Activity {
         JSONObject newReminder= new JSONObject();
 
         try {
-            newReminder.put("name", desc.getText().toString());
-            newReminder.put("date", date.getText().toString());
+               newReminder.put("name", reminderDescription.getText().toString());
+               newReminder.put("date", eventDate.getText().toString());
 
-
-            if(remindertype.getSelectedItem().toString().equalsIgnoreCase("birthday")){
-                newReminder.put("type", "1");
-            }
-            else
-            {
-                newReminder.put("type", "2");
-            }
-
+                if(reminderType.getSelectedItem().toString().equalsIgnoreCase("birthday")){
+                    newReminder.put("type", "1");
+                }
+                else
+                {
+                    newReminder.put("type", "2");
+                }
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -112,11 +108,7 @@ public class AddReminderActivity extends Activity {
                 sb.append(line);
             }
 
-            Log.v("info",sb.toString());
-
             remindersList = new JSONArray(sb.toString());
-
-
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -130,6 +122,7 @@ public class AddReminderActivity extends Activity {
         String filename = "reminders.json";
 
         JSONArray existingReminders = readFromRemindersFile();
+
         JSONObject obj=null;
         try {
             obj = new JSONObject(newReminder);
@@ -139,7 +132,6 @@ public class AddReminderActivity extends Activity {
 
         existingReminders.put(obj);
 
-        String string="";
         FileOutputStream outputStream;
 
         try {
@@ -154,20 +146,19 @@ public class AddReminderActivity extends Activity {
 
     public void setCurrentDateOnView() {
 
-        DatePicker dpResult = (DatePicker) findViewById(R.id.dpResult);
+        DatePicker datePicker = (DatePicker) findViewById(R.id.dpResult);
 
         final Calendar c = Calendar.getInstance();
         year = c.get(Calendar.YEAR);
         month = c.get(Calendar.MONTH);
         day = c.get(Calendar.DAY_OF_MONTH);
 
-        // set current date into datepicker
-        dpResult.init(year, month, day, null);
+        datePicker.init(year, month, day, null);
     }
 
 
     public void selectNewDate(View view){
-        showDialog(1);
+        showDialog(DATE_PICKER_DIALOG);
     }
 
 
