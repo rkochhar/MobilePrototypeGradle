@@ -55,7 +55,7 @@ public class RemindersListFragment extends Fragment
         
         try 
         {
-        	reminders = CommonUtils.getReminders(getActivity().getAssets().open("reminders.json"));
+            reminders = CommonUtils.getReminders(getActivity().getAssets().open("reminders.json"),this.getActivity().getApplicationContext());
 		} 
         catch (Exception e) 
         {
