@@ -8,11 +8,15 @@
     <string name="title_activity_add_reminder">Add New Reminder</string>
     <string name="reminder_desc">Reminder Description</string>
     <string name="reminder_type">Type</string>
-    <string name="reminder_date">Date (yyyy-mm-dd format)</string>
-    <string name="reminder_add_button">Add New</string>
+    <string name="reminder_date">Enter Date (yyyy-MM-dd)</string>
+    <string name="reminder_add_button">Add</string>
     <string name="delete">Delete</string>
     <string name="alarm">Set alarm</string>
-    <string name="details_heading">Details</string>
-
+    <string name="reminder_prompt">Choose the reminder type</string>
+    <string-array name="type_arrays">
+        <item >Anniversary</item>
+        <item >Birthday</item>
+    </string-array>
+   <string name="details_heading">Details</string>
 
 </resources>
