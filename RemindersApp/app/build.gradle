@@ -2,7 +2,7 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion '19.0.1'
 
     defaultConfig {
         minSdkVersion 11
@@ -19,4 +19,5 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:+'
+    compile 'com.google.code.gson:gson:2.2.+'
 }

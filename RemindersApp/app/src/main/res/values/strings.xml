@@ -9,8 +9,10 @@
     <string name="reminder_desc">Reminder Description</string>
     <string name="reminder_type">Type</string>
     <string name="reminder_date">Date (yyyy-mm-dd format)</string>
-     <string name="reminder_add_button">Add New</string>
-     <string name="delete">Delete</string>
-     <string name="alarm">Set alarm</string>
+    <string name="reminder_add_button">Add New</string>
+    <string name="delete">Delete</string>
+    <string name="alarm">Set alarm</string>
+    <string name="details_heading">Details</string>
+
 
 </resources>

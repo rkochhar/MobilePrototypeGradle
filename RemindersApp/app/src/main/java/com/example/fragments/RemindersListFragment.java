@@ -1,14 +1,24 @@
 package com.example.fragments;
 
+import java.net.URI;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import android.accounts.Account;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +33,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.adapter.RemindersAdapter;
+import com.example.authenticator.AuthenticatorService;
 import com.example.dto.Record;
+import com.example.provider.ReminderContract;
 import com.example.receiver.ReminderReceiver;
 import com.example.remindersapp.AddReminderActivity;
 import com.example.remindersapp.R;
@@ -38,6 +50,10 @@ public class RemindersListFragment extends Fragment
 	private int selectedIndex;
 	
 	OnReminderSelectedListener callback;
+
+    List<Record> reminders;
+
+    private static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 	
 	public RemindersListFragment()
 	{
@@ -51,11 +67,11 @@ public class RemindersListFragment extends Fragment
 		View fragmentView = inflater.inflate(R.layout.reminder_fragment, container, false);
 		
 		ListView list = (ListView) fragmentView.findViewById(R.id.listView1);;
-		List<Record> reminders = null;
         
         try 
         {
-        	reminders = CommonUtils.getReminders(getActivity().getAssets().open("reminders.json"));
+            Cursor remindersCursor = getActivity().getContentResolver().query(ReminderContract.Entry.CONTENT_URI, null, "", null, null);
+            reminders = getRemindersFromCursor(remindersCursor);
 		} 
         catch (Exception e) 
         {
@@ -88,20 +104,39 @@ public class RemindersListFragment extends Fragment
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position,
 					long id) {
-				callback.onReminderSelected(position);
+				callback.onReminderSelected(reminders.get(position));
 				
 			}
 		});
         
 		return fragmentView;
 	}
-	
-	@Override
+
+    private List<Record> getRemindersFromCursor(Cursor remindersCursor) {
+        int nameIndex = remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_NAME);
+        int dateIndex = remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_DATE);
+        int typeIndex = remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_TYPE);
+        List<Record> reminders = new ArrayList<Record>();
+        while(remindersCursor.moveToNext())
+        {
+            Record record = null;
+            try {
+                record = new Record(remindersCursor.getString(nameIndex), DATEFORMAT.parse(remindersCursor.getString(dateIndex)), remindersCursor.getString(typeIndex));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            reminders.add(record);
+        }
+        return reminders;
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		//Need to remove this. Orientation change is adding fragment twice currently.
 		menu.clear();
     	menu.add("Sort by date");
     	menu.add("New");
+        menu.add("Refresh");
     }
     
     @Override
@@ -119,6 +154,14 @@ public class RemindersListFragment extends Fragment
     		startActivity(newReminderIntent);
     		
     	}
+        else if(operation.equalsIgnoreCase("Refresh"))
+        {
+            Bundle settingsBundle = new Bundle();
+            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            Account account = AuthenticatorService.getAccount("com.example.remindersapp.account");
+            ContentResolver.requestSync(account, ReminderContract.CONTENT_AUTHORITY, settingsBundle);
+        }
     	
 		return true;
     	
@@ -182,7 +225,6 @@ public class RemindersListFragment extends Fragment
 				mode.finish();
 				return true;
 			}
-			
 			else
 			{
 				return false;
@@ -191,7 +233,7 @@ public class RemindersListFragment extends Fragment
 	};
 	
 	public interface OnReminderSelectedListener {
-		public void onReminderSelected(int position);
+		public void onReminderSelected(Record record);
 	}
 	
 	@Override
