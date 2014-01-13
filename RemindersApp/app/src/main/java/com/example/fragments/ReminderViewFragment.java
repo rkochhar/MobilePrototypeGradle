@@ -1,5 +1,6 @@
 package com.example.fragments;
 
+import com.example.dto.Record;
 import com.example.remindersapp.R;
 
 import android.app.Fragment;
@@ -16,18 +17,24 @@ public class ReminderViewFragment extends Fragment
             Bundle savedInstanceState) {
 		View fragmentView = inflater.inflate(R.layout.reminder_view_fragment, container, false);
 		Bundle bundle = this.getArguments();
-		int position = bundle != null ? bundle.getInt("position", -1) : -1;
-		if(position != -1)
+		Record record = bundle != null ? (Record) bundle.getSerializable("selected") : null;
+		if(record != null)
 		{
-			updateView(position, fragmentView);
+			updateView(record, fragmentView);
 		}
 		return fragmentView;
 	}
 	
-	public void updateView(int position, View view)
+	public void updateView(Record record, View view)
 	{
-		TextView text = (TextView) view.findViewById(R.id.textView1);
-		text.setText("You are viewing record " + (position + 1));
+		TextView detailsName = (TextView) view.findViewById(R.id.detailsName);
+        detailsName.setText(record.getName());
+
+        TextView detailsType = (TextView) view.findViewById(R.id.detailsType);
+        detailsType.setText(record.getType());
+
+        TextView detailsDate = (TextView) view.findViewById(R.id.detailsDate);
+        detailsDate.setText(record.getDate().toString());
 		
 	}
 

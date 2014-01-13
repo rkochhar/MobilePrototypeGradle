@@ -28,13 +28,24 @@
         android:layout_below="@+id/name"
         android:layout_alignLeft="@+id/name"/>
     
-    <TextView
+   <!--<TextView
         android:id="@+id/type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 		android:layout_alignParentRight="true"      
 		android:layout_centerVertical="true"  
 		android:layout_marginEnd="5dp"
+        />-->
+
+
+
+    <ImageView
+        android:id="@+id/alarmImage"
+        android:src="@drawable/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         />
-    
+
 </RelativeLayout>

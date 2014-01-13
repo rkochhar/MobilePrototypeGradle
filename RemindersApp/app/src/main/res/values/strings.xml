@@ -17,5 +17,6 @@
         <item >Anniversary</item>
         <item >Birthday</item>
     </string-array>
+   <string name="details_heading">Details</string>
 
 </resources>
