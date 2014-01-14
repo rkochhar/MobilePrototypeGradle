@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
 public class ReminderProvider extends ContentProvider
 {
@@ -27,7 +28,6 @@ public class ReminderProvider extends ContentProvider
     @Override
     public boolean onCreate() {
         remindersDatabaseHelper = new RemindersDatabaseHelper(getContext());
-        remindersDatabaseHelper.onCreate(remindersDatabaseHelper.getReadableDatabase());
         return true;
     }
 
@@ -36,17 +36,21 @@ public class ReminderProvider extends ContentProvider
         SQLiteDatabase db = remindersDatabaseHelper.getReadableDatabase();
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         int uriMatch = uriMatcher.match(uri);
+        Cursor c = null;
         switch (uriMatch) {
             case ROUTE_ENTRIES_ID:
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 queryBuilder.appendWhere(
                         "_ID" + " = " + id);
-                return queryBuilder.query(db, projections, selection, selectionArgs, null, null, null );
+                c = queryBuilder.query(db, projections, selection, selectionArgs, null, null, null );
+                return c;
 
             case ROUTE_ENTRIES:
                 // Return all known entries.
-                return db.query(ReminderContract.Entry.TABLE_NAME, projections, selection, selectionArgs, null, null, null );
+                c = db.query(ReminderContract.Entry.TABLE_NAME, projections, selection, selectionArgs, null, null, sortOder );
+                c.setNotificationUri(getContext().getContentResolver(), ReminderContract.Entry.CONTENT_URI);
+                return c;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -67,7 +71,51 @@ public class ReminderProvider extends ContentProvider
 
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
-        return null;
+        final SQLiteDatabase db = remindersDatabaseHelper.getWritableDatabase();
+        assert db != null;
+        final int match = uriMatcher.match(uri);
+        Uri result;
+        switch (match) {
+            case ROUTE_ENTRIES:
+                long id = db.insertOrThrow(ReminderContract.Entry.TABLE_NAME, null, contentValues);
+                result = Uri.parse(ReminderContract.Entry.CONTENT_URI + "/" + id);
+                break;
+            case ROUTE_ENTRIES_ID:
+                throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase db = remindersDatabaseHelper.getWritableDatabase();
+        assert db != null;
+        final int match = uriMatcher.match(uri);
+        Uri result;
+        switch (match) {
+            case ROUTE_ENTRIES:
+                try{
+                    db.beginTransaction();
+                    for (ContentValues cv : values) {
+                        long id = db.insertOrThrow(ReminderContract.Entry.TABLE_NAME, null, cv);
+                    }
+                    db.setTransactionSuccessful();
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                finally {
+                    db.endTransaction();
+                }
+                break;
+            case ROUTE_ENTRIES_ID:
+                throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        return values.length;
     }
 
     @Override
@@ -76,8 +124,21 @@ public class ReminderProvider extends ContentProvider
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+        Log.i("update ", "started");
+        final SQLiteDatabase db = remindersDatabaseHelper.getWritableDatabase();
+        final int match = uriMatcher.match(uri);
+        int count;
+        switch (match) {
+            case ROUTE_ENTRIES_ID:
+                String id = uri.getLastPathSegment();
+                count = db.update(ReminderContract.Entry.TABLE_NAME, contentValues, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        Log.i("update ", "finished "+ count);
+        return count;
     }
 
     static class RemindersDatabaseHelper extends SQLiteOpenHelper
@@ -95,7 +156,9 @@ public class ReminderProvider extends ContentProvider
                         ReminderContract.Entry.COLUMN_NAME_NAME    + TYPE_TEXT + COMMA_SEP +
                         ReminderContract.Entry.COLUMN_NAME_DATE + TYPE_TEXT + COMMA_SEP +
                         ReminderContract.Entry.COLUMN_NAME_TYPE + TYPE_INTEGER + COMMA_SEP +
-                        ReminderContract.Entry.COLUMN_NAME_SET + " BOOLEAN" +")";
+                        ReminderContract.Entry.COLUMN_NAME_SET + TYPE_INTEGER + COMMA_SEP +
+                        ReminderContract.Entry.COLUMN_NAME_GROUP + TYPE_TEXT + COMMA_SEP +
+                        ReminderContract.Entry.COLUMN_NAME_IS_LOCAL + " BOOLEAN" + ")";
 
         /** SQL statement to drop "entry" table. */
         private static final String SQL_DELETE_ENTRIES =
@@ -110,21 +173,6 @@ public class ReminderProvider extends ContentProvider
         public void onCreate(SQLiteDatabase sqLiteDatabase) {
             sqLiteDatabase.execSQL(SQL_DELETE_ENTRIES);
             sqLiteDatabase.execSQL(SQL_CREATE_ENTRIES);
-            ContentValues values = new ContentValues();
-            values.put(ReminderContract.Entry.COLUMN_NAME_ENTRY_ID, "1");
-            values.put(ReminderContract.Entry.COLUMN_NAME_NAME, "Record 1");
-            values.put(ReminderContract.Entry.COLUMN_NAME_DATE, "1987-01-01");
-            values.put(ReminderContract.Entry.COLUMN_NAME_TYPE, 1);
-            values.put(ReminderContract.Entry.COLUMN_NAME_SET, false);
-            sqLiteDatabase.insert(ReminderContract.Entry.TABLE_NAME, "", values);
-
-            values.clear();
-            values.put(ReminderContract.Entry.COLUMN_NAME_ENTRY_ID, "2");
-            values.put(ReminderContract.Entry.COLUMN_NAME_NAME, "Record 2");
-            values.put(ReminderContract.Entry.COLUMN_NAME_DATE, "1990-03-06");
-            values.put(ReminderContract.Entry.COLUMN_NAME_TYPE, 2);
-            values.put(ReminderContract.Entry.COLUMN_NAME_SET, false);
-            sqLiteDatabase.insert(ReminderContract.Entry.TABLE_NAME, "", values);
         }
 
         @Override
@@ -132,5 +180,6 @@ public class ReminderProvider extends ContentProvider
             sqLiteDatabase.execSQL(SQL_DELETE_ENTRIES);
             onCreate(sqLiteDatabase);
         }
+
     }
 }

@@ -4,13 +4,16 @@ import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SyncResult;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.example.dto.Record;
 import com.example.dto.ServerDTO;
+import com.example.provider.ReminderContract;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -31,7 +34,14 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -43,11 +53,36 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
     @Override
     public void onPerformSync(Account account, Bundle bundle, String authority, ContentProviderClient contentProviderClient, SyncResult syncResult) {
-        Log.i("PerformSync", "Performing sync");
         try{
             ServerDTO dto = getReminders(getRemindersFromServer().getEntity().getContent());
-            //Log.i("PerformSync", dto.getItems().size()+"");
             //Compare existing items in db with the server and update accordingly
+            Cursor remindersCursor = contentResolver.query(ReminderContract.Entry.CONTENT_URI, null, "", null, null);
+
+            Set<String> availableReminders = new HashSet<String>();
+            while(remindersCursor.moveToNext())
+            {
+                availableReminders.add(remindersCursor.getString(remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_ENTRY_ID)));
+            }
+            List<ContentValues> contentValues = new ArrayList<ContentValues>();
+
+            for (ServerDTO.Items item : dto.getItems()) {
+                if( availableReminders.add(item.getKey().getId()) )
+                {
+                    ContentValues values = new ContentValues();
+                    values.put(ReminderContract.Entry.COLUMN_NAME_ENTRY_ID, item.getKey().getId());
+                    values.put(ReminderContract.Entry.COLUMN_NAME_NAME, item.getReminderMsg());
+                    values.put(ReminderContract.Entry.COLUMN_NAME_DATE, item.getDate());
+                    values.put(ReminderContract.Entry.COLUMN_NAME_TYPE, item.getType());
+                    values.put(ReminderContract.Entry.COLUMN_NAME_SET, false);
+                    values.put(ReminderContract.Entry.COLUMN_NAME_IS_LOCAL, false);
+                    values.put(ReminderContract.Entry.COLUMN_NAME_GROUP, item.getGroup());
+                    contentValues.add(values);
+                }
+            }
+            if(contentValues.size() != 0)
+            {
+                contentResolver.bulkInsert(ReminderContract.Entry.CONTENT_URI, contentValues.toArray(new ContentValues[contentValues.size()]));
+            }
         }
         catch(Exception e)
         {
@@ -72,7 +107,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String reminders =  writer.toString();
             Log.i("Output", reminders);
             Gson gson = new GsonBuilder().create();
-            Type recordListType = new TypeToken<List<Record>>(){}.getType();
+            //Type recordListType = new TypeToken<List<Record>>(){}.getType();
             return gson.fromJson(reminders, ServerDTO.class);
         } else {
             return null;

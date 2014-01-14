@@ -19,7 +19,7 @@ public class ReminderReceiver extends BroadcastReceiver{
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		
+		android.os.Debug.waitForDebugger();
 		Record record = (Record) intent.getExtras().get("selectedReminder");
 		
 		Toast.makeText(context, "Happy " + record.getType(), Toast.LENGTH_LONG).show();

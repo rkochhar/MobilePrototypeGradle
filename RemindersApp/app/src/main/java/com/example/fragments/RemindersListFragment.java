@@ -1,24 +1,20 @@
 package com.example.fragments;
 
-import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import android.accounts.Account;
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.Fragment;
-import android.app.PendingIntent;
+import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,30 +24,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.SimpleCursorAdapter;
 
-import com.example.adapter.RemindersAdapter;
 import com.example.authenticator.AuthenticatorService;
 import com.example.dto.Record;
+import com.example.dto.RecordTypeEnum;
 import com.example.provider.ReminderContract;
-import com.example.receiver.ReminderReceiver;
 import com.example.remindersapp.AddReminderActivity;
 import com.example.remindersapp.R;
-import com.example.utils.CommonUtils;
 
-public class RemindersListFragment extends Fragment
+public class RemindersListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>
 {
-	private RemindersAdapter remindersAdapter;
-	
-	private ActionMode actionMode;
-	
-	private int selectedIndex;
-	
 	OnReminderSelectedListener callback;
 
-    List<Record> reminders;
+    SimpleCursorAdapter simpleCursorAdapter;
 
     private static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 	
@@ -65,76 +53,75 @@ public class RemindersListFragment extends Fragment
             Bundle savedInstanceState) {
 		
 		View fragmentView = inflater.inflate(R.layout.reminder_fragment, container, false);
-		
-		ListView list = (ListView) fragmentView.findViewById(R.id.listView1);;
-        
-        try 
-        {
-            Cursor remindersCursor = getActivity().getContentResolver().query(ReminderContract.Entry.CONTENT_URI, null, "", null, null);
-            reminders = getRemindersFromCursor(remindersCursor);
-		} 
-        catch (Exception e) 
-        {
-			e.printStackTrace();
-		}
-        remindersAdapter = new RemindersAdapter(reminders);
-        list.setAdapter(remindersAdapter);
-        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        list.setOnItemLongClickListener(new OnItemLongClickListener() {
+        ListView list = (ListView) fragmentView.findViewById(R.id.listView1);
 
-			@Override
-			public boolean onItemLongClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-				selectedIndex = position;
-				if(actionMode != null)
-				{
-					return false;
-				}
-				else
-				{
-					actionMode = adapterView.startActionMode(actionModeCallback);
-					adapterView.setSelected(true);
-				}
-				return true;
-			}
-		});
-        
+        simpleCursorAdapter = new SimpleCursorAdapter(this.getActivity(), R.layout.reminder_list_item, null, new String[] {ReminderContract.Entry.COLUMN_NAME_NAME, ReminderContract.Entry.COLUMN_NAME_DATE, ReminderContract.Entry.COLUMN_NAME_TYPE, ReminderContract.Entry.COLUMN_NAME_SET}, new int[] {R.id.name, R.id.date, R.id.typeImage, R.id.alarmImage}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+
+        simpleCursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder(){
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex){
+                if(view.getId() == R.id.typeImage){
+                    final ImageView typeImage = (ImageView) view;
+                    if(cursor.getInt(columnIndex) == RecordTypeEnum.BIRTHDAY.getType())
+                    {
+                        typeImage.setImageResource(R.drawable.birthday);
+                    }
+                    else
+                    {
+                        typeImage.setImageResource(R.drawable.anniversary);
+                    }
+
+                    return true;
+                }
+                else if(view.getId() == R.id.alarmImage) {
+                    boolean isAlarmSet = cursor.getInt(columnIndex) > 0;
+                    if(isAlarmSet)
+                    {
+                        ((ImageView)view).setImageResource(R.drawable.clock_disable);
+                    }
+                    else
+                    {
+                        ((ImageView)view).setImageResource(R.drawable.clock);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+        list.setAdapter(simpleCursorAdapter);
+        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         list.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position,
 					long id) {
-				callback.onReminderSelected(reminders.get(position));
+
+                Cursor c = (Cursor) simpleCursorAdapter.getItem(position);
+                int nameIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_NAME);
+                int dateIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_DATE);
+                int typeIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_TYPE);
+                int isAlarmSetIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_SET);
+                Record record = null;
+                try {
+                    record = new Record(c.getString(nameIndex), DATEFORMAT.parse(c.getString(dateIndex)), c.getString(typeIndex));
+                    record.setAlarmSet(c.getInt(isAlarmSetIndex) > 0);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                callback.onReminderSelected(record);
 				
 			}
 		});
-        
+
+        getLoaderManager().initLoader(0, null, this);
 		return fragmentView;
 	}
-
-    private List<Record> getRemindersFromCursor(Cursor remindersCursor) {
-        int nameIndex = remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_NAME);
-        int dateIndex = remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_DATE);
-        int typeIndex = remindersCursor.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_TYPE);
-        List<Record> reminders = new ArrayList<Record>();
-        while(remindersCursor.moveToNext())
-        {
-            Record record = null;
-            try {
-                record = new Record(remindersCursor.getString(nameIndex), DATEFORMAT.parse(remindersCursor.getString(dateIndex)), remindersCursor.getString(typeIndex));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            reminders.add(record);
-        }
-        return reminders;
-    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		//Need to remove this. Orientation change is adding fragment twice currently.
 		menu.clear();
-    	menu.add("Sort by date");
     	menu.add("New");
         menu.add("Refresh");
     }
@@ -144,11 +131,7 @@ public class RemindersListFragment extends Fragment
     	
     	final String operation = item.getTitle().toString();
     	
-    	if(operation.equalsIgnoreCase("Sort by Date")){
-    		remindersAdapter.setReminders(CommonUtils.sortRemindersByDate(remindersAdapter.getReminders()));
-    		remindersAdapter.notifyDataSetChanged();
-    	}
-    	else if(operation.equalsIgnoreCase("New")){
+    	if(operation.equalsIgnoreCase("New")){
     		
     		Intent newReminderIntent = new Intent(this.getActivity(),AddReminderActivity.class);
     		startActivity(newReminderIntent);
@@ -167,72 +150,25 @@ public class RemindersListFragment extends Fragment
     	
     }
     
-    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
-		
-    	@Override
-		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-			MenuItem alarmMenuOption = menu.findItem(R.id.alarm);
-			if(remindersAdapter.getReminders().get(selectedIndex).isAlarmSet())
-			{
-	            alarmMenuOption.setIcon(R.drawable.clock_disable);
-	            return true;
-			}
-			else
-			{
-				alarmMenuOption.setIcon(R.drawable.clock);
-				return true;
-			}
-		}
-		
-		@Override
-		public void onDestroyActionMode(ActionMode mode) {
-			actionMode = null;
-			
-		}
-		
-		@Override
-		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			MenuInflater menuInflater = mode.getMenuInflater();
-			menuInflater.inflate(R.menu.reminder_list_menu, menu);
-			return true;
-		}
-		
-		@Override
-		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-			
-			if(item.getItemId() == R.id.delete)
-			{
-				remindersAdapter.getReminders().remove(selectedIndex);
-				remindersAdapter.notifyDataSetChanged();
-				mode.finish();
-				return true;
-			}
-			else if(item.getItemId() == R.id.alarm)
-			{
-				Record selectedRecord = remindersAdapter.getReminders().get(selectedIndex);
-				if(!selectedRecord.isAlarmSet())
-				{
-					Intent intent = new Intent(getView().getContext(), ReminderReceiver.class);
-					intent.putExtra("selectedReminder", selectedRecord);
-					intent.putExtra("selectedIndex", selectedIndex);
-					PendingIntent pendingIntent = PendingIntent.getBroadcast(getView().getContext(), 0, intent , PendingIntent.FLAG_UPDATE_CURRENT);
-					AlarmManager alarmManager = (AlarmManager) getView().getContext().getSystemService(Context.ALARM_SERVICE);
-					
-					alarmManager.set(AlarmManager.RTC, selectedRecord.getDate().getTime() , pendingIntent);
-					selectedRecord.setAlarmSet(true);
-					Toast.makeText(getView().getContext(), "Alarm is set", Toast.LENGTH_LONG).show();
-				}
-				mode.finish();
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-	};
-	
-	public interface OnReminderSelectedListener {
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(getActivity(), ReminderContract.Entry.CONTENT_URI,
+                null, "", null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        simpleCursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        simpleCursorAdapter.swapCursor(null);
+    }
+
+    public interface OnReminderSelectedListener {
 		public void onReminderSelected(Record record);
 	}
 	
@@ -249,5 +185,20 @@ public class RemindersListFragment extends Fragment
                     + " must implement OnReminderSelectedListener");
         }
 	}
-	
+
+    private Record getRecord(Cursor c)
+    {
+        int nameIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_NAME);
+        int dateIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_DATE);
+        int typeIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_TYPE);
+        int isAlarmSetIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_SET);
+        Record record = null;
+        try {
+            record = new Record(c.getString(nameIndex), DATEFORMAT.parse(c.getString(dateIndex)), c.getString(typeIndex));
+            record.setAlarmSet(c.getInt(isAlarmSetIndex) > 0);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return record;
+    }
 }
