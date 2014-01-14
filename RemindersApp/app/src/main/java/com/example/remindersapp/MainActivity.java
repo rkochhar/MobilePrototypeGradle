@@ -21,7 +21,7 @@ public class MainActivity extends Activity implements OnReminderSelectedListener
         super.onCreate(savedInstanceState);
         createSyncAccount(this);
         setContentView(R.layout.activity_main);
-        
+
         if (findViewById(R.id.mainLayout) != null) 
         {
         	if (savedInstanceState != null) {
@@ -60,9 +60,7 @@ public class MainActivity extends Activity implements OnReminderSelectedListener
         if(accountManager.addAccountExplicitly(account, null, null))
         {
             ContentResolver.setIsSyncable(account, ReminderContract.CONTENT_AUTHORITY, 1);
-            ContentResolver.setSyncAutomatically(account, ReminderContract.CONTENT_AUTHORITY, true);
-            ContentResolver.addPeriodicSync(
-                    account, ReminderContract.CONTENT_AUTHORITY, new Bundle(), 3600);
+            //ContentResolver.setSyncAutomatically(account, ReminderContract.CONTENT_AUTHORITY, true);
         }
     }
 

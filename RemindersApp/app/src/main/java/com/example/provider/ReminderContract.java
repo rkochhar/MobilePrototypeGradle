@@ -33,5 +33,9 @@ public class ReminderContract {
         public static final String COLUMN_NAME_TYPE = "type";
 
         public static final String COLUMN_NAME_SET = "alarm";
+
+        public static final String COLUMN_NAME_GROUP = "reminder_group";
+
+        public static final String COLUMN_NAME_IS_LOCAL = "is_local";
     }
 }

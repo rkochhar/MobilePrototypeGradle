@@ -7,12 +7,13 @@ public class ServerDTO {
     private String etag;
     private List<Items> items;
 
-    class Items
+    public class Items
     {
         private Key key;
         private String reminderMsg;
-        private String dateCreated;
+        private String date;
         private int type;
+        private String group;
 
         public Key getKey() {
             return key;
@@ -30,12 +31,12 @@ public class ServerDTO {
             this.reminderMsg = reminderMsg;
         }
 
-        public String getDateCreated() {
-            return dateCreated;
+        public String getDate() {
+            return date;
         }
 
-        public void setDateCreated(String dateCreated) {
-            this.dateCreated = dateCreated;
+        public void setDate(String date) {
+            this.date = date;
         }
 
         public int getType() {
@@ -45,9 +46,13 @@ public class ServerDTO {
         public void setType(int type) {
             this.type = type;
         }
+
+        public String getGroup() { return group; }
+
+        public void setGroup(String group) { this.group = group; }
     }
 
-    class Key
+    public class Key
     {
         private String kind;
         private String appId;
