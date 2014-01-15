@@ -7,15 +7,20 @@ import java.util.Locale;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.ActionMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,11 +32,13 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.example.authenticator.AuthenticatorService;
 import com.example.dto.Record;
 import com.example.dto.RecordTypeEnum;
 import com.example.provider.ReminderContract;
+import com.example.receiver.ReminderReceiver;
 import com.example.remindersapp.AddReminderActivity;
 import com.example.remindersapp.R;
 
@@ -41,7 +48,7 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
 
     SimpleCursorAdapter simpleCursorAdapter;
 
-    private static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static DateFormat DATEFORMAT = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 	
 	public RemindersListFragment()
 	{
@@ -74,6 +81,7 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
                 }
                 else if(view.getId() == R.id.alarmImage) {
                     boolean isAlarmSet = cursor.getInt(columnIndex) > 0;
+                    view.setTag(Integer.valueOf(cursor.getInt(cursor.getColumnIndex(ReminderContract.Entry._ID))));
                     if(isAlarmSet)
                     {
                         ((ImageView)view).setImageResource(R.drawable.clock_disable);
@@ -82,6 +90,7 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
                     {
                         ((ImageView)view).setImageResource(R.drawable.clock);
                     }
+                    view.setOnClickListener(onClickListener);
                     return true;
                 }
                 return false;
@@ -201,4 +210,40 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
         }
         return record;
     }
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            int recordId = (Integer) view.getTag();
+            Cursor cursor = simpleCursorAdapter.getCursor();
+            cursor.moveToPosition(recordId - 1);
+            Record currentRecord = getRecord(cursor);
+            boolean isAlarmSet = currentRecord.isAlarmSet();
+            ContentValues value = new ContentValues();
+            value.clear();
+            AlarmManager alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(view.getContext(), ReminderReceiver.class);
+            if( !isAlarmSet )
+            {
+                value.put(ReminderContract.Entry.COLUMN_NAME_SET, 1);
+                ((ImageView)view).setImageResource(R.drawable.clock_disable);
+                //Set repeating alarm
+                intent.putExtra("selectedReminder", recordId);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(view.getContext(), recordId, intent , PendingIntent.FLAG_UPDATE_CURRENT);
+
+                alarmManager.setRepeating(AlarmManager.RTC, currentRecord.getDate().getTime(), 31556952000L, pendingIntent);
+
+                Toast.makeText(view.getContext(), "Alarm is set", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                value.put(ReminderContract.Entry.COLUMN_NAME_SET, 0);
+                ((ImageView)view).setImageResource(R.drawable.clock);
+                PendingIntent sender = PendingIntent.getBroadcast(view.getContext(),recordId, intent, 0);
+                alarmManager.cancel(sender);
+                Toast.makeText(view.getContext(), "Alarm removed", Toast.LENGTH_LONG).show();
+            }
+            getActivity().getContentResolver().update(ReminderContract.Entry.CONTENT_URI.buildUpon().appendPath("/"+recordId).build(), value, "_id="+recordId, null);
+        }
+    };
 }
