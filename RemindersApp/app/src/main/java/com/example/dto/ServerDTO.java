@@ -1,5 +1,6 @@
 package com.example.dto;
 
+import java.util.Date;
 import java.util.List;
 
 public class ServerDTO {
@@ -11,7 +12,7 @@ public class ServerDTO {
     {
         private Key key;
         private String reminderMsg;
-        private String date;
+        private Date date;
         private int type;
         private String group;
 
@@ -31,11 +32,11 @@ public class ServerDTO {
             this.reminderMsg = reminderMsg;
         }
 
-        public String getDate() {
+        public Date getDate() {
             return date;
         }
 
-        public void setDate(String date) {
+        public void setDate(Date date) {
             this.date = date;
         }
 

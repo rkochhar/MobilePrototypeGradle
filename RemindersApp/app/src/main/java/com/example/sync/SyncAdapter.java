@@ -34,18 +34,23 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     ContentResolver contentResolver;
+
+    private static DateFormat DATEFORMAT = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -71,7 +76,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     ContentValues values = new ContentValues();
                     values.put(ReminderContract.Entry.COLUMN_NAME_ENTRY_ID, item.getKey().getId());
                     values.put(ReminderContract.Entry.COLUMN_NAME_NAME, item.getReminderMsg());
-                    values.put(ReminderContract.Entry.COLUMN_NAME_DATE, item.getDate());
+                    values.put(ReminderContract.Entry.COLUMN_NAME_DATE, DATEFORMAT.format(item.getDate()));
                     values.put(ReminderContract.Entry.COLUMN_NAME_TYPE, item.getType());
                     values.put(ReminderContract.Entry.COLUMN_NAME_SET, false);
                     values.put(ReminderContract.Entry.COLUMN_NAME_IS_LOCAL, false);
@@ -106,7 +111,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
             String reminders =  writer.toString();
             Log.i("Output", reminders);
-            Gson gson = new GsonBuilder().create();
+            Gson gson = new GsonBuilder().setDateFormat("dd-MM-yyyy").create();
             //Type recordListType = new TypeToken<List<Record>>(){}.getType();
             return gson.fromJson(reminders, ServerDTO.class);
         } else {

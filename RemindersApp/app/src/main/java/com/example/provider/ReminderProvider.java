@@ -35,6 +35,7 @@ public class ReminderProvider extends ContentProvider
     public Cursor query(Uri uri, String[] projections, String selection, String[] selectionArgs, String sortOder) {
         SQLiteDatabase db = remindersDatabaseHelper.getReadableDatabase();
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        queryBuilder.setTables(ReminderContract.Entry.TABLE_NAME);
         int uriMatch = uriMatcher.match(uri);
         Cursor c = null;
         switch (uriMatch) {
@@ -138,6 +139,7 @@ public class ReminderProvider extends ContentProvider
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         Log.i("update ", "finished "+ count);
+        getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 
