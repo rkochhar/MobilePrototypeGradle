@@ -47,17 +47,8 @@
         android:paddingLeft="2dp"
         android:paddingRight="8dp"
         android:textStyle="bold"
+        android:textColor="#b6b6b4"
        />
-
-    <ImageView
-        android:id="@+id/user_group"
-        android:src="@drawable/user_group"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/groupName"
-        />
 
 
 </RelativeLayout>
