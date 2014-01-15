@@ -55,7 +55,7 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
 		View fragmentView = inflater.inflate(R.layout.reminder_fragment, container, false);
         ListView list = (ListView) fragmentView.findViewById(R.id.listView1);
 
-        simpleCursorAdapter = new SimpleCursorAdapter(this.getActivity(), R.layout.reminder_list_item, null, new String[] {ReminderContract.Entry.COLUMN_NAME_NAME, ReminderContract.Entry.COLUMN_NAME_DATE, ReminderContract.Entry.COLUMN_NAME_TYPE, ReminderContract.Entry.COLUMN_NAME_SET}, new int[] {R.id.name, R.id.date, R.id.typeImage, R.id.alarmImage}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        simpleCursorAdapter = new SimpleCursorAdapter(this.getActivity(), R.layout.reminder_list_item, null, new String[] {ReminderContract.Entry.COLUMN_NAME_NAME, ReminderContract.Entry.COLUMN_NAME_DATE, ReminderContract.Entry.COLUMN_NAME_TYPE, ReminderContract.Entry.COLUMN_NAME_SET, ReminderContract.Entry.COLUMN_NAME_GROUP}, new int[] {R.id.name, R.id.date, R.id.typeImage, R.id.alarmImage, R.id.groupName}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
         simpleCursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder(){
             public boolean setViewValue(View view, Cursor cursor, int columnIndex){

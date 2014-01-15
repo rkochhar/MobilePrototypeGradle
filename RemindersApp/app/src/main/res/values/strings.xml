@@ -13,6 +13,8 @@
     <string name="delete">Delete</string>
     <string name="alarm">Set alarm</string>
     <string name="reminder_prompt">Choose the reminder type</string>
+    <string name="groupName">Enter Group Name</string>
+
     <string-array name="type_arrays">
         <item >Anniversary</item>
         <item >Birthday</item>
