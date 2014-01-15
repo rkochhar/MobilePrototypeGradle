@@ -38,4 +38,27 @@
         android:layout_centerVertical="true"
         />
 
+    <TextView
+        android:id="@+id/groupName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/alarmImage"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:textStyle="bold"
+       />
+
+    <ImageView
+        android:id="@+id/user_group"
+        android:src="@drawable/user_group"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/groupName"
+        />
+
+
 </RelativeLayout>

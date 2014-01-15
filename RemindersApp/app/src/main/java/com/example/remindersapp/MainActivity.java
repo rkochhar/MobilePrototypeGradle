@@ -2,6 +2,7 @@ package com.example.remindersapp;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.ContentResolver;
@@ -21,6 +22,29 @@ public class MainActivity extends Activity implements OnReminderSelectedListener
         super.onCreate(savedInstanceState);
         createSyncAccount(this);
         setContentView(R.layout.activity_main);
+
+        ActionBar appActionBar= getActionBar();
+        appActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+                // show the given tab
+            }
+
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+                // hide the given tab
+            }
+
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+                // probably ignore this event
+            }
+        };
+
+        appActionBar.addTab(appActionBar.newTab().setText("SHARED").setTabListener(tabListener));
+        appActionBar.addTab(appActionBar.newTab().setText("PERSONAL").setTabListener(tabListener));
+
+
 
         if (findViewById(R.id.mainLayout) != null) 
         {

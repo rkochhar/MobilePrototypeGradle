@@ -7,7 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".AddReminderActivity"
-    android:background="#fff5ee">
+    >
 
     <TextView
         android:layout_width="wrap_content"
@@ -33,6 +33,7 @@
         android:layout_below="@id/desc"
         android:hint="@string/reminder_prompt"/>
 
+
     <EditText
         android:id="@+id/date"
         android:layout_width="fill_parent"
@@ -42,13 +43,23 @@
         android:onClick="selectNewDate"
         />
 
+    <EditText
+        android:id="@+id/groupName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date"
+        android:hint="@string/groupName"
+        />
+
     <DatePicker
         android:id="@+id/dpResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/date"
+        android:layout_below="@id/groupName"
         android:background="#f0f0f0"
         android:onClick="selectNewDate"
+        android:layout_centerHorizontal="true"
+        android:calendarViewShown="false"
         />
 
     <Button
