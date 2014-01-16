@@ -39,8 +39,13 @@ import com.example.dto.Record;
 import com.example.dto.RecordTypeEnum;
 import com.example.provider.ReminderContract;
 import com.example.receiver.ReminderReceiver;
+import com.example.remindersapp.AddPreferenceActivity;
 import com.example.remindersapp.AddReminderActivity;
 import com.example.remindersapp.R;
+import com.example.utils.FiltersUpdator;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 public class RemindersListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>
 {
@@ -133,6 +138,7 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
 		menu.clear();
     	menu.add("New");
         menu.add("Refresh");
+        menu.add("Customize");
     }
     
     @Override
@@ -154,6 +160,11 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
             Account account = AuthenticatorService.getAccount("com.example.remindersapp.account");
             ContentResolver.requestSync(account, ReminderContract.CONTENT_AUTHORITY, settingsBundle);
         }
+
+        else if(operation.equalsIgnoreCase("customize")){
+            Intent customizeActivity = new Intent(this.getActivity(), AddPreferenceActivity.class);
+            startActivity(customizeActivity);
+        }
     	
 		return true;
     	
@@ -162,8 +173,30 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(getActivity(), ReminderContract.Entry.CONTENT_URI,
-                null, "", null,
+
+        FiltersUpdator filtersObj = new FiltersUpdator();
+        JSONArray blackListedGroups = filtersObj.readFromFiltersFile(getActivity().getApplicationContext());
+
+        int index=0;
+        String whereClause ="";
+
+        try {
+            while(index<blackListedGroups.length()-1){
+
+
+                whereClause+=ReminderContract.Entry.COLUMN_NAME_GROUP+"!='"+blackListedGroups.get(index).toString()+"' AND ";
+
+                index++;
+            }
+
+            whereClause+=ReminderContract.Entry.COLUMN_NAME_GROUP+"!='"+blackListedGroups.get(index).toString()+"'";
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return new CursorLoader(getActivity(), ReminderContract.Entry.CONTENT_URI,null, whereClause, null,
                 null);
     }
 
