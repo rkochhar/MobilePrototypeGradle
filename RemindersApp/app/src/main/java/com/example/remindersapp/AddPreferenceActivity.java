@@ -17,6 +17,10 @@ import android.view.View;
 import com.example.provider.ReminderContract;
 import com.example.utils.FiltersUpdator;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.HashSet;
 
 
 public class AddPreferenceActivity extends PreferenceActivity {
@@ -37,6 +41,7 @@ public class AddPreferenceActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_general);
         setContentView(R.layout.preference_layout);
         PreferenceCategory customCategory= (PreferenceCategory) findPreference("customPrefer");
+        setupSummary();
         addCheckboxPreferences(customCategory);
 
     }
@@ -64,6 +69,22 @@ public class AddPreferenceActivity extends PreferenceActivity {
 
         distinctGroups.moveToFirst();
 
+        HashSet<String> filteredGroupsSet = new HashSet<String>();
+        FiltersUpdator obj1 = new FiltersUpdator();
+        JSONArray filterList = obj1.readFromFiltersFile(this.getApplicationContext());
+
+        int in=0;
+        while(in <filterList.length()){
+
+            try {
+                filteredGroupsSet.add(filterList.getString(in));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            in++;
+        }
+
+
         while(!distinctGroups.isLast()){
 
             groupName= distinctGroups.getString(distinctGroups.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_GROUP));
@@ -72,7 +93,14 @@ public class AddPreferenceActivity extends PreferenceActivity {
             obj.setOnPreferenceChangeListener(checkboxPreferenceChangeListener);
             obj.setTitle(groupName);
             obj.setKey(groupName);
-            obj.setDefaultValue(true);
+            if(!filteredGroupsSet.contains(groupName)){
+                obj.setDefaultValue(true);
+                obj.setSummary(visible);
+            }
+            else{
+                obj.setDefaultValue(false);
+                obj.setSummary(hidden);
+            }
             test.addPreference(obj);
         }
     }
