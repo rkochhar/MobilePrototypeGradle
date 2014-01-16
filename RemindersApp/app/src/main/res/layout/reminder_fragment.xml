@@ -3,7 +3,8 @@
     android:id="@+id/listView1"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" 
-    android:longClickable="true">
+    android:longClickable="true"
+    style="@style/ListStyle"
+    >
     
-
 </ListView>
