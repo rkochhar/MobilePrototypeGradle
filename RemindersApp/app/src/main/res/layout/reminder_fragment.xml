@@ -5,6 +5,7 @@
     android:layout_height="wrap_content" 
     android:longClickable="true"
     style="@style/ListStyle"
+    android:listSelector="@drawable/list_selector"
     >
     
 </ListView>
