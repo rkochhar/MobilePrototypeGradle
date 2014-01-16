@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Toggle Notifications"
+        android:key="customPrefer">
+    </PreferenceCategory>
+
+</PreferenceScreen>
+
