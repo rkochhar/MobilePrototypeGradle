@@ -1,23 +1,25 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    >
 
     <ImageView
+        style="@style/ListStyle.Content"
         android:id="@+id/typeImage"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:scaleType="fitCenter"
-        android:layout_margin="5dp"
         />
     
     <TextView
+        style="@style/ListStyle.Content"
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/typeImage"
-        android:layout_margin="5dp"
         />
     
     
@@ -26,15 +28,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/name"
-        android:layout_alignLeft="@+id/name"/>
+        android:layout_alignLeft="@+id/name"
+        android:fontFamily="sans-serif-light"/>
 
 
-    <ImageView
+    <ImageButton
+        style="?android:borderlessButtonStyle"
         android:id="@+id/alarmImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
         />
 
     <TextView
@@ -42,13 +45,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@id/alarmImage"
-        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:paddingLeft="2dp"
-        android:paddingRight="8dp"
-        android:textStyle="bold"
-        android:textColor="#b6b6b4"
-       />
+        android:fontFamily="sans-serif-thin"
+        />
 
 
 </RelativeLayout>
