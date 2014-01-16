@@ -49,16 +49,16 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
     SimpleCursorAdapter simpleCursorAdapter;
 
     private static DateFormat DATEFORMAT = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
-	
+
 	public RemindersListFragment()
 	{
 		setHasOptionsMenu(true);
 	}
-	
+
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-		
+
 		View fragmentView = inflater.inflate(R.layout.reminder_fragment, container, false);
         ListView list = (ListView) fragmentView.findViewById(R.id.listView1);
 
@@ -102,9 +102,9 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
         list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         list.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position,
-					long id) {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position,
+                                    long id) {
 
                 Cursor c = (Cursor) simpleCursorAdapter.getItem(position);
                 int nameIndex = c.getColumnIndex(ReminderContract.Entry.COLUMN_NAME_NAME);
@@ -119,9 +119,9 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
                     e.printStackTrace();
                 }
                 callback.onReminderSelected(record);
-				
-			}
-		});
+
+            }
+        });
 
         getLoaderManager().initLoader(0, null, this);
 		return fragmentView;
@@ -134,17 +134,17 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
     	menu.add("New");
         menu.add("Refresh");
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-    	
+
     	final String operation = item.getTitle().toString();
-    	
+
     	if(operation.equalsIgnoreCase("New")){
-    		
+
     		Intent newReminderIntent = new Intent(this.getActivity(),AddReminderActivity.class);
     		startActivity(newReminderIntent);
-    		
+
     	}
         else if(operation.equalsIgnoreCase("Refresh"))
         {
@@ -154,11 +154,11 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
             Account account = AuthenticatorService.getAccount("com.example.remindersapp.account");
             ContentResolver.requestSync(account, ReminderContract.CONTENT_AUTHORITY, settingsBundle);
         }
-    	
+
 		return true;
-    	
+
     }
-    
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -180,15 +180,15 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
     public interface OnReminderSelectedListener {
 		public void onReminderSelected(Record record);
 	}
-	
+
 	@Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try 
+        try
         {
             callback = (OnReminderSelectedListener) activity;
-        } 
-        catch (ClassCastException e) 
+        }
+        catch (ClassCastException e)
         {
             throw new ClassCastException(activity.toString()
                     + " must implement OnReminderSelectedListener");
