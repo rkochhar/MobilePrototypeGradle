@@ -33,6 +33,11 @@ public class ReminderProvider extends ContentProvider
 
     @Override
     public Cursor query(Uri uri, String[] projections, String selection, String[] selectionArgs, String sortOder) {
+
+        if(sortOder==null){
+            sortOder=ReminderContract.Entry.COLUMN_NAME_GROUP;
+        }
+
         SQLiteDatabase db = remindersDatabaseHelper.getReadableDatabase();
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(ReminderContract.Entry.TABLE_NAME);
