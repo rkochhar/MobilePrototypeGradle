@@ -248,8 +248,8 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
         @Override
         public void onClick(View view) {
             int recordId = (Integer) view.getTag();
-            Cursor cursor = simpleCursorAdapter.getCursor();
-            cursor.moveToPosition(recordId - 1);
+            Cursor cursor = getActivity().getContentResolver().query(ReminderContract.Entry.CONTENT_URI.buildUpon().appendPath(""+recordId).build(), null, "", null, null);
+            cursor.moveToNext();
             Record currentRecord = getRecord(cursor);
             boolean isAlarmSet = currentRecord.isAlarmSet();
             ContentValues value = new ContentValues();
