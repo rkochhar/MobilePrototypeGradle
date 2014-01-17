@@ -6,6 +6,7 @@
     <string name="action_search">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_add_reminder">Add New Reminder</string>
+    <string name="details_activity">Details</string>
     <string name="reminder_desc">Reminder Description</string>
     <string name="reminder_type">Type</string>
     <string name="reminder_date">Enter Date (yyyy-MM-dd)</string>

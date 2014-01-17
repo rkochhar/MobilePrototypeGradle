@@ -5,5 +5,11 @@
     android:orientation="horizontal"
     android:id="@+id/mainLayout"
     >
-
+    <fragment
+        android:id="@+id/fragmentMain"
+        android:name="com.example.fragments.RemindersListFragment"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        />
 </LinearLayout>

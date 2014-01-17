@@ -2,18 +2,14 @@ package com.example.remindersapp;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.dto.Record;
-import com.example.fragments.PersonalRemindersListFragment;
 import com.example.fragments.ReminderViewFragment;
-import com.example.fragments.RemindersListFragment;
 import com.example.fragments.RemindersListFragment.OnReminderSelectedListener;
 import com.example.provider.ReminderContract;
 
@@ -24,16 +20,6 @@ public class MainActivity extends Activity implements OnReminderSelectedListener
         super.onCreate(savedInstanceState);
         createSyncAccount(this);
         setContentView(R.layout.activity_main);
-
-
-        if (findViewById(R.id.mainLayout) != null) 
-        {
-        	if (savedInstanceState != null) {
-                return;
-            }
-	        RemindersListFragment remindersListFragment = new RemindersListFragment();
-	        getFragmentManager().beginTransaction().add(R.id.mainLayout, remindersListFragment).commit();
-        }
     }
 
 	@Override
@@ -42,14 +28,9 @@ public class MainActivity extends Activity implements OnReminderSelectedListener
 		
 		if (findViewById(R.id.mainLayout) != null)
 		{
-			displayFragment = new ReminderViewFragment();
-			Bundle bundle = new Bundle();
-			bundle.putSerializable("selected", record);
-			displayFragment.setArguments(bundle);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.mainLayout, displayFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+            Intent detailsIntent = new Intent(this, DetailsActivity.class);
+            detailsIntent.putExtra("selected", record);
+            startActivity(detailsIntent);
 		}
 		else
 		{

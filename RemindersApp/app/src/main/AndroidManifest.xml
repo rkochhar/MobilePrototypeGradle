@@ -38,7 +38,10 @@
             android:label="@string/title_activity_add_preference"
             >
         </activity>
-
+        <activity
+            android:name="com.example.remindersapp.DetailsActivity"
+            android:label="@string/details_activity"
+            />
         <service android:name="com.example.authenticator.AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
