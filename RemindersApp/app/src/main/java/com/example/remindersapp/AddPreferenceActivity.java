@@ -64,8 +64,10 @@ public class AddPreferenceActivity extends PreferenceActivity {
         FiltersUpdater updaterObj= new FiltersUpdater();
         updaterObj.execute(getApplicationContext(), updatedFilteredGroup);
 
-        Intent mainActivity=  new Intent(this,MainActivity.class);
-        startActivity(mainActivity);
+        Intent mainActivityIntent=  new Intent(this,MainActivity.class);
+        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(mainActivityIntent);
     }
 
     public void setupSummary(){
