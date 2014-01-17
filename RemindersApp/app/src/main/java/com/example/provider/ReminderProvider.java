@@ -11,11 +11,6 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
 
-import com.example.utils.FiltersUpdator;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 public class ReminderProvider extends ContentProvider
 {
     RemindersDatabaseHelper remindersDatabaseHelper;

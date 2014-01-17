@@ -15,7 +15,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 
 import com.example.provider.ReminderContract;
-import com.example.utils.FiltersUpdator;
+import com.example.utils.FiltersUpdater;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +48,22 @@ public class AddPreferenceActivity extends PreferenceActivity {
 
     public void reFocusReminders(View view){
 
+        PreferenceCategory customCategory= (PreferenceCategory) findPreference("customPrefer");
+
+        final int count = customCategory.getPreferenceCount();
+        int i=0;
+        JSONArray updatedFilteredGroup= new JSONArray();
+        while (i<count){
+
+            CheckBoxPreference checkboxPreference = (CheckBoxPreference)customCategory.getPreference(i);
+            if(!checkboxPreference.isChecked())
+                   updatedFilteredGroup.put(checkboxPreference.getTitle());
+            i++;
+        }
+
+        FiltersUpdater updaterObj= new FiltersUpdater();
+        updaterObj.execute(getApplicationContext(), updatedFilteredGroup);
+
         Intent mainActivity=  new Intent(this,MainActivity.class);
         startActivity(mainActivity);
     }
@@ -70,7 +86,7 @@ public class AddPreferenceActivity extends PreferenceActivity {
         distinctGroups.moveToFirst();
 
         HashSet<String> filteredGroupsSet = new HashSet<String>();
-        FiltersUpdator obj1 = new FiltersUpdator();
+        FiltersUpdater obj1 = new FiltersUpdater();
         JSONArray filterList = obj1.readFromFiltersFile(this.getApplicationContext());
 
         int in=0;
@@ -118,14 +134,10 @@ public class AddPreferenceActivity extends PreferenceActivity {
             Spannable hidden = new SpannableString( "Reminders from this group will be hidden." );
             hidden.setSpan( new ForegroundColorSpan(Color.LTGRAY), 0, hidden.length(), 0 );
 
-                if(stringValue.equalsIgnoreCase("true")){
-                    preference.setSummary(visible);
-                    new FiltersUpdator().unblockGroup(preference.getTitle().toString(),preference.getContext());
-                }
-            else{
-                    preference.setSummary(hidden);
-                    new FiltersUpdator().updateFilters(preference.getTitle().toString(), preference.getContext());
-                }
+                if(stringValue.equalsIgnoreCase("true"))
+                   preference.setSummary(visible);
+               else
+                   preference.setSummary(hidden);
 
             return true;
         }

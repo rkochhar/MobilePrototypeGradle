@@ -8,8 +8,10 @@ import android.app.FragmentTransaction;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.dto.Record;
+import com.example.fragments.PersonalRemindersListFragment;
 import com.example.fragments.ReminderViewFragment;
 import com.example.fragments.RemindersListFragment;
 import com.example.fragments.RemindersListFragment.OnReminderSelectedListener;
@@ -22,28 +24,6 @@ public class MainActivity extends Activity implements OnReminderSelectedListener
         super.onCreate(savedInstanceState);
         createSyncAccount(this);
         setContentView(R.layout.activity_main);
-
-        ActionBar appActionBar= getActionBar();
-        appActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-
-        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // show the given tab
-            }
-
-            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // hide the given tab
-            }
-
-            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // probably ignore this event
-            }
-        };
-
-        appActionBar.addTab(appActionBar.newTab().setText("SHARED").setTabListener(tabListener));
-        appActionBar.addTab(appActionBar.newTab().setText("PERSONAL").setTabListener(tabListener));
-
 
 
         if (findViewById(R.id.mainLayout) != null) 
