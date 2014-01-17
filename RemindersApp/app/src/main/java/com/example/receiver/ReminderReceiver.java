@@ -3,14 +3,14 @@ package com.example.receiver;
 import com.example.dto.Record;
 import com.example.dto.RecordTypeEnum;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.widget.Toast;
 
 import com.example.provider.ReminderContract;
@@ -37,7 +37,7 @@ public class ReminderReceiver extends BroadcastReceiver{
 		
 		PendingIntent pendingIntent = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 		
-		NotificationCompat.Builder n = new NotificationCompat.Builder(context)
+		Notification.Builder n = new Notification.Builder(context)
         .setContentTitle("New reminder for " + reminderMsg)
         .setSmallIcon(reminderType.equals(RecordTypeEnum.ANNIVERSARY.name()) ? R.drawable.anniversary : R.drawable.birthday)
         .setContentIntent(pendingIntent)
