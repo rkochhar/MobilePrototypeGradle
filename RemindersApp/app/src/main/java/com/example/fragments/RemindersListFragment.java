@@ -40,7 +40,7 @@ import com.example.receiver.ReminderReceiver;
 import com.example.remindersapp.AddPreferenceActivity;
 import com.example.remindersapp.AddReminderActivity;
 import com.example.remindersapp.R;
-import com.example.utils.FiltersUpdator;
+import com.example.utils.FiltersUpdater;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -174,7 +174,7 @@ public class RemindersListFragment extends Fragment implements LoaderManager.Loa
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
 
-        FiltersUpdator filtersObj = new FiltersUpdator();
+        FiltersUpdater filtersObj = new FiltersUpdater();
         JSONArray blackListedGroups = filtersObj.readFromFiltersFile(getActivity().getApplicationContext());
 
         int index=0;
